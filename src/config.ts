@@ -1,7 +1,7 @@
 import z from 'zod'
 
 const configSchema = z.object({
-  NEXT_PUBIC_API_ENDPOINT: z.string(),
+  NEXT_PUBLIC_API_ENDPOINT: z.string(),
   NEXT_PUBLIC_URL: z.string()
 })
 
