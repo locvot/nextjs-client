@@ -5,11 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { handleErrorApi } from '@/lib/utils'
+import { useLoginMutation } from '@/queries/useAuth'
 import { LoginBody, LoginBodyType } from '@/schemaValidations/auth.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 
 export default function LoginForm() {
+  const loginMutation = useLoginMutation()
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
     defaultValues: {
@@ -17,6 +21,19 @@ export default function LoginForm() {
       password: ''
     }
   })
+
+  const onSubmit = async (data: LoginBodyType) => {
+    if (loginMutation.isPending) return
+    try {
+      const result = await loginMutation.mutateAsync(data)
+      toast(result.payload.message)
+    } catch (error) {
+      handleErrorApi({
+        error,
+        setError: form.setError
+      })
+    }
+  }
 
   return (
     <Card className='mx-auto w-full max-w-md'>
@@ -26,7 +43,13 @@ export default function LoginForm() {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form className='space-y-2 max-w-[1200px] flex-shrink-0 w-full' noValidate>
+          <form
+            className='space-y-2 max-w-[1200px] flex-shrink-0 w-full'
+            noValidate
+            onSubmit={form.handleSubmit(onSubmit, (err) => {
+              console.error(err)
+            })}
+          >
             <div className='grid gap-4'>
               <FormField
                 control={form.control}
