@@ -22,5 +22,12 @@ export const LoginRes = z.object({
   message: z.string()
 })
 
+export const LogoutBody = z
+  .object({
+    refreshToken: z.string()
+  })
+  .strict()
+
 export type LoginBodyType = z.TypeOf<typeof LoginBody>
 export type LoginResType = z.TypeOf<typeof LoginRes>
+export type LogoutBodyType = z.TypeOf<typeof LogoutBody>
