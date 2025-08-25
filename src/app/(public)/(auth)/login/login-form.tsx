@@ -9,6 +9,7 @@ import { handleErrorApi } from '@/lib/utils'
 import { useLoginMutation } from '@/queries/useAuth'
 import { LoginBody, LoginBodyType } from '@/schemaValidations/auth.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -21,12 +22,14 @@ export default function LoginForm() {
       password: ''
     }
   })
+  const router = useRouter()
 
   const onSubmit = async (data: LoginBodyType) => {
     if (loginMutation.isPending) return
     try {
       const result = await loginMutation.mutateAsync(data)
       toast(result.payload.message)
+      router.push('/manage/dashboard')
     } catch (error) {
       handleErrorApi({
         error,
