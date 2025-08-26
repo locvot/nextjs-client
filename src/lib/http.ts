@@ -107,6 +107,8 @@ const request = async <Response>(
             localStorage.removeItem('accessToken')
             localStorage.removeItem('refreshToken')
             clientLogoutRequest = null
+            // Redirect to login page may cause infinite loop if we dont process correctly
+            // E.g: we are at login page, we call API need AT, AT was removed -> program jump here -> infinite loop
             location.href = '/login'
           }
         }

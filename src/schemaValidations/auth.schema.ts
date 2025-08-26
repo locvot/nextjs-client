@@ -28,6 +28,22 @@ export const LogoutBody = z
   })
   .strict()
 
+export const RefreshTokenBody = z
+  .object({
+    refreshToken: z.string()
+  })
+  .strict()
+
+export const RefreshTokenRes = z.object({
+  data: z.object({
+    accessToken: z.string(),
+    refreshToken: z.string()
+  }),
+  message: z.string()
+})
+
 export type LoginBodyType = z.TypeOf<typeof LoginBody>
 export type LoginResType = z.TypeOf<typeof LoginRes>
 export type LogoutBodyType = z.TypeOf<typeof LogoutBody>
+export type RefreshTokenBodyType = z.TypeOf<typeof RefreshTokenBody>
+export type RefreshTokenResType = z.TypeOf<typeof RefreshTokenRes>
