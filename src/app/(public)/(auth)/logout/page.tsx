@@ -32,7 +32,7 @@ function Logout() {
     } else {
       router.push('/')
     }
-  }, [mutateAsync, router, refreshTokenFromUrl, setIsAuth])
+  }, [mutateAsync, router, refreshTokenFromUrl, accessTokenFromUrl, setIsAuth])
 
   return <div>Logout ...</div>
 }
