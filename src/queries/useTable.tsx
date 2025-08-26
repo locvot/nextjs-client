@@ -10,7 +10,7 @@ export const useTableListQuery = () => {
   })
 }
 
-export const useGetTabQuery = ({ id, enabled }: { id: number; enabled: boolean }) => {
+export const useGetTableQuery = ({ id, enabled }: { id: number; enabled: boolean }) => {
   return useQuery({
     queryKey: ['tables', id],
     queryFn: () => tableApiRequest.getTable(id),

@@ -206,7 +206,9 @@ export default function TableTable() {
           <Input
             placeholder='Lọc số bàn'
             value={(table.getColumn('number')?.getFilterValue() as string) ?? ''}
-            onChange={(event) => table.getColumn('number')?.setFilterValue(event.target.value)}
+            onChange={(event) => {
+              table.getColumn('number')?.setFilterValue(event.target.value)
+            }}
             className='max-w-sm'
           />
           <div className='ml-auto flex items-center gap-2'>
