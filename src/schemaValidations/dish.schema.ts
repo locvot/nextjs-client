@@ -3,9 +3,9 @@ import z from 'zod'
 
 export const CreateDishBody = z.object({
   name: z.string().min(1).max(256),
-  price: z.coerce.number().positive(),
+  price: z.coerce.number<number>().positive(),
   description: z.string().max(10000),
-  image: z.string().url(),
+  image: z.url(),
   status: z.enum(DishStatusValues).optional()
 })
 
