@@ -62,7 +62,7 @@ export const checkAndRefreshToken = async (param?: { onError?: () => void; onSuc
   const decodedAccessToken = jwt.decode(accessToken) as { exp: number; iat: number }
   const decodedRefreshToken = jwt.decode(refreshToken) as { exp: number; iat: number }
   // Exp of token (second), new Date().getTime() (ms)
-  const now = Math.round(new Date().getTime() / 1000)
+  const now = new Date().getTime() / 1000 - 1
   // RT expired => return
   if (decodedRefreshToken.exp <= now) {
     removeTokensFromLocalStorage()
