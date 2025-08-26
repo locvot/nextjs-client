@@ -42,6 +42,8 @@ import AutoPagination from '@/components/auto-pagination'
 import { TableListResType } from '@/schemaValidations/table.schema'
 import EditTable from '@/app/manage/tables/edit-table'
 import AddTable from '@/app/manage/tables/add-table'
+import QRCodeTable from '@/components/qrcode-table'
+import { useTableListQuery } from '@/queries/useTable'
 
 type TableItem = TableListResType['data'][0]
 
@@ -76,7 +78,11 @@ export const columns: ColumnDef<TableItem>[] = [
   {
     accessorKey: 'token',
     header: 'QR Code',
-    cell: ({ row }) => <div>{row.getValue('number')}</div>
+    cell: ({ row }) => (
+      <div>
+        <QRCodeTable token={row.getValue('token')} tableNumber={row.getValue('number')} />
+      </div>
+    )
   },
   {
     id: 'actions',
@@ -151,7 +157,8 @@ export default function TableTable() {
   // const params = Object.fromEntries(searchParam.entries())
   const [tableIdEdit, setTableIdEdit] = useState<number | undefined>()
   const [tableDelete, setTableDelete] = useState<TableItem | null>(null)
-  const data: any[] = []
+  const tableListQuery = useTableListQuery()
+  const data = tableListQuery.data?.payload.data ?? []
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -191,7 +198,7 @@ export default function TableTable() {
   }, [table, pageIndex])
 
   return (
-    <TableTableContext.Provider value={{ tableIdEdit, setTableIdEdit, tableDelete, setTableDelete }}>
+    <TableTableContext value={{ tableIdEdit, setTableIdEdit, tableDelete, setTableDelete }}>
       <div className='w-full'>
         <EditTable id={tableIdEdit} setId={setTableIdEdit} />
         <AlertDialogDeleteTable tableDelete={tableDelete} setTableDelete={setTableDelete} />
@@ -254,6 +261,6 @@ export default function TableTable() {
           </div>
         </div>
       </div>
-    </TableTableContext.Provider>
+    </TableTableContext>
   )
 }
