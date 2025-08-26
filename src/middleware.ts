@@ -27,7 +27,6 @@ export function middleware(request: NextRequest) {
 
     url.searchParams.set('refreshToken', refreshToken)
     url.searchParams.set('redirect', pathname)
-    console.log(url)
     return NextResponse.redirect(url)
   }
 
