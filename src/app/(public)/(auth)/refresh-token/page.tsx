@@ -13,10 +13,11 @@ export default function RefreshTokenPage() {
     if (refreshTokenFromUrl && refreshTokenFromUrl === getRefreshTokenFromLocalStorage()) {
       checkAndRefreshToken({
         onSuccess: () => {
-          console.log('here')
           router.push(redirectPathname || '/')
         }
       })
+    } else {
+      router.push('/')
     }
   }, [router, refreshTokenFromUrl, redirectPathname])
   return <div>Refresh Token</div>
