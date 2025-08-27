@@ -51,12 +51,12 @@ export type CreateEmployeeAccountBodyType = z.TypeOf<typeof CreateEmployeeAccoun
 export const UpdateEmployeeAccountBody = z
   .object({
     name: z.string().trim().min(2).max(256),
-    email: z.string().email(),
-    avatar: z.string().url().optional(),
+    email: z.email(),
+    avatar: z.url().optional(),
     changePassword: z.boolean().optional(),
     password: z.string().min(6).max(100).optional(),
     confirmPassword: z.string().min(6).max(100).optional(),
-    role: z.enum([Role.Owner, Role.Employee]).optional().default(Role.Employee)
+    role: z.enum([Role.Owner, Role.Employee]).default(Role.Employee).optional()
   })
   .strict()
   .superRefine(({ confirmPassword, password, changePassword }, ctx) => {
