@@ -7,6 +7,7 @@ import { twMerge } from 'tailwind-merge'
 import jwt from 'jsonwebtoken'
 import envConfig from '@/config'
 import { DishStatus, TableStatus } from '@/constants/type'
+import { TokenPayload } from '@/types/jwt.types'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -61,8 +62,8 @@ export const checkAndRefreshToken = async (param?: { onError?: () => void; onSuc
   const refreshToken = getRefreshTokenFromLocalStorage()
   // If user has not logged in -> dont run this func
   if (!accessToken || !refreshToken) return
-  const decodedAccessToken = jwt.decode(accessToken) as { exp: number; iat: number }
-  const decodedRefreshToken = jwt.decode(refreshToken) as { exp: number; iat: number }
+  const decodedAccessToken = decodeToken(accessToken)
+  const decodedRefreshToken = decodeToken(refreshToken)
   // Exp of token (second), new Date().getTime() (ms)
   const now = new Date().getTime() / 1000 - 1
   // RT expired => return
@@ -115,4 +116,8 @@ export const getVietnameseTableStatus = (status: (typeof TableStatus)[keyof type
 
 export const getTableLink = ({ token, tableNumber }: { token: string; tableNumber: number }) => {
   return envConfig.NEXT_PUBLIC_URL + '/tables/' + tableNumber + '?token=' + token
+}
+
+export const decodeToken = (token: string) => {
+  return jwt.decode(token) as TokenPayload
 }
