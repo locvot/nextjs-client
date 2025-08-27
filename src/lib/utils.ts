@@ -6,8 +6,9 @@ import { toast } from 'sonner'
 import { twMerge } from 'tailwind-merge'
 import jwt from 'jsonwebtoken'
 import envConfig from '@/config'
-import { DishStatus, TableStatus } from '@/constants/type'
+import { DishStatus, Role, TableStatus } from '@/constants/type'
 import { TokenPayload } from '@/types/jwt.types'
+import guestApiRequest from '@/apiRequests/guest'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -75,7 +76,8 @@ export const checkAndRefreshToken = async (param?: { onError?: () => void; onSuc
   // Check 1/3 time -> get RT
   if (decodedAccessToken.exp - now < (decodedAccessToken.exp - decodedAccessToken.iat) / 3) {
     try {
-      const res = await authApiRequest.refreshToken()
+      const role = decodedRefreshToken.role
+      const res = role === Role.Guest ? await guestApiRequest.refreshToken() : await authApiRequest.refreshToken()
       setAccessTokenToLocalStorage(res.payload.data.accessToken)
       setRefreshTokenToLocalStorage(res.payload.data.refreshToken)
       param?.onSuccess && param.onSuccess()
