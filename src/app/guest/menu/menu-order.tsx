@@ -23,7 +23,7 @@ export default function MenuOrder() {
   const totalPrice = dishes.reduce((result, dish) => {
     const order = orders.find((order) => order.dishId === dish.id)
     if (!order) return result
-    return (result = order.quantity * dish.price)
+    return result + order.quantity * dish.price
   }, 0)
 
   const handleQuantityChange = (dishId: number, quantity: number) => {
