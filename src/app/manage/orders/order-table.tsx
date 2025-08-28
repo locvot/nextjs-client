@@ -32,8 +32,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { endOfDay, format, startOfDay } from 'date-fns'
 import TableSkeleton from '@/app/manage/orders/table-skeleton'
 import { GuestCreateOrdersResType } from '@/schemaValidations/guest.schema'
-import { useGetOrderListQuery } from '@/queries/useOrder'
+import { useGetOrderListQuery, useUpdateOrderMutation } from '@/queries/useOrder'
 import { useTableListQuery } from '@/queries/useTable'
+import socket from '@/lib/socket'
+import { toast } from 'sonner'
 
 export const OrderTableContext = createContext({
   setOrderIdEdit: (value: number | undefined) => {},
@@ -58,6 +60,7 @@ export type ServingGuestByTableNumber = Record<number, OrderObjectByGuestID>
 const PAGE_SIZE = 10
 const initFromDate = startOfDay(new Date())
 const initToDate = endOfDay(new Date())
+
 export default function OrderTable() {
   const searchParam = useSearchParams()
   const [openStatusFilter, setOpenStatusFilter] = useState(false)
@@ -66,9 +69,13 @@ export default function OrderTable() {
   const page = searchParam.get('page') ? Number(searchParam.get('page')) : 1
   const pageIndex = page - 1
   const [orderIdEdit, setOrderIdEdit] = useState<number | undefined>()
-  const orderListQuery = useGetOrderListQuery({ fromDate, toDate })
-  const tableListQuery = useTableListQuery()
+  const orderListQuery = useGetOrderListQuery({
+    fromDate,
+    toDate
+  })
+  const refetchOrderList = orderListQuery.refetch
   const orderList = orderListQuery.data?.payload.data ?? []
+  const tableListQuery = useTableListQuery()
   const tableList = tableListQuery.data?.payload.data ?? []
   const tableListSortedByNumber = tableList.sort((a, b) => a.number - b.number)
   const [sorting, setSorting] = useState<SortingState>([])
@@ -79,7 +86,7 @@ export default function OrderTable() {
     pageIndex, // Gía trị mặc định ban đầu, không có ý nghĩa khi data được fetch bất đồng bộ
     pageSize: PAGE_SIZE //default page size
   })
-
+  const updateOrderMutation = useUpdateOrderMutation()
   const { statics, orderObjectByGuestId, servingGuestByTableNumber } = useOrderService(orderList)
 
   const changeStatus = async (body: {
@@ -87,8 +94,16 @@ export default function OrderTable() {
     dishId: number
     status: (typeof OrderStatusValues)[number]
     quantity: number
-  }) => {}
-
+  }) => {
+    try {
+      await updateOrderMutation.mutateAsync(body)
+    } catch (error) {
+      handleErrorApi({
+        error
+      })
+    }
+  }
+  ///
   const table = useReactTable({
     data: orderList,
     columns: orderTableColumns,
@@ -123,8 +138,58 @@ export default function OrderTable() {
     setToDate(initToDate)
   }
 
+  useEffect(() => {
+    if (socket.connected) {
+      onConnect()
+    }
+
+    function onConnect() {
+      console.log(socket.id)
+    }
+
+    function onDisconnect() {
+      console.log('disconnect')
+    }
+
+    function refetch() {
+      const now = new Date()
+      if (now >= fromDate && now <= toDate) {
+        refetchOrderList()
+      }
+    }
+
+    function onUpdateOrder(data: UpdateOrderResType['data']) {
+      const {
+        dishSnapshot: { name },
+        quantity
+      } = data
+      toast(
+        `Món ${name} (SL: ${quantity}) vừa được cập nhật sang trạng thái "${getVietnameseOrderStatus(data.status)}"`
+      )
+      refetch()
+    }
+
+    function onNewOrder(data: GuestCreateOrdersResType['data']) {
+      const { guest } = data[0]
+      toast(`${guest?.name} tại bàn ${guest?.tableNumber} vừa đặt ${data.length} đơn`)
+      refetch()
+    }
+
+    socket.on('update-order', onUpdateOrder)
+    socket.on('new-order', onNewOrder)
+    socket.on('connect', onConnect)
+    socket.on('disconnect', onDisconnect)
+
+    return () => {
+      socket.off('connect', onConnect)
+      socket.off('disconnect', onDisconnect)
+      socket.off('update-order', onUpdateOrder)
+      socket.off('new-order', onNewOrder)
+    }
+  }, [refetchOrderList, fromDate, toDate])
+
   return (
-    <OrderTableContext
+    <OrderTableContext.Provider
       value={{
         orderIdEdit,
         setOrderIdEdit,
@@ -229,7 +294,6 @@ export default function OrderTable() {
           tableList={tableListSortedByNumber}
           servingGuestByTableNumber={servingGuestByTableNumber}
         />
-        {/* <TableSkeleton /> */}
         {orderListQuery.isPending && <TableSkeleton />}
         {!orderListQuery.isPending && (
           <div className='rounded-md border'>
@@ -269,7 +333,6 @@ export default function OrderTable() {
             </Table>
           </div>
         )}
-
         <div className='flex items-center justify-end space-x-2 py-4'>
           <div className='text-xs text-muted-foreground py-4 flex-1 '>
             Hiển thị <strong>{table.getPaginationRowModel().rows.length}</strong> trong{' '}
@@ -284,6 +347,6 @@ export default function OrderTable() {
           </div>
         </div>
       </div>
-    </OrderTableContext>
+    </OrderTableContext.Provider>
   )
 }

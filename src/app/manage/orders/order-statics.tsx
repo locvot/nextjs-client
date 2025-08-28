@@ -10,34 +10,6 @@ import { ServingGuestByTableNumber, Statics, StatusCountObject } from '@/app/man
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import OrderGuestDetail from '@/app/manage/orders/order-guest-detail'
 
-// Ví dụ:
-// const statics: Statics = {
-//   status: {
-//     Pending: 1,
-//     Processing: 2,
-//     Delivered: 3,
-//     Paid: 5,
-//     Rejected: 0
-//   },
-//   table: {
-//     1: { // Bàn số 1
-//       20: { // Guest 20
-//         Pending: 1,
-//         Processing: 2,
-//         Delivered: 3,
-//         Paid: 5,
-//         Rejected: 0
-//       },
-//       21: { // Guest 21
-//         Pending: 1,
-//         Processing: 2,
-//         Delivered: 3,
-//         Paid: 5,
-//         Rejected: 0
-//       }
-//     }
-//   }
-// }
 export default function OrderStatics({
   statics,
   tableList,
