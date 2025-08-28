@@ -7,3 +7,5 @@ const socket = io(envConfig.NEXT_PUBLIC_API_ENDPOINT, {
     Authorization: `Bearer ${getAccessTokenFromLocalStorage}`
   }
 })
+
+export default socket
