@@ -60,7 +60,11 @@ export const removeTokensFromLocalStorage = () => {
   isBrowser && localStorage.removeItem('refreshToken')
 }
 
-export const checkAndRefreshToken = async (param?: { onError?: () => void; onSuccess?: () => void }) => {
+export const checkAndRefreshToken = async (param?: {
+  onError?: () => void
+  onSuccess?: () => void
+  force?: boolean
+}) => {
   const accessToken = getAccessTokenFromLocalStorage()
   const refreshToken = getRefreshTokenFromLocalStorage()
   // If user has not logged in -> dont run this func
@@ -76,7 +80,7 @@ export const checkAndRefreshToken = async (param?: { onError?: () => void; onSuc
   }
   // Assume Exp of AT is 10s
   // Check 1/3 time -> get RT
-  if (decodedAccessToken.exp - now < (decodedAccessToken.exp - decodedAccessToken.iat) / 3) {
+  if (param?.force || decodedAccessToken.exp - now < (decodedAccessToken.exp - decodedAccessToken.iat) / 3) {
     try {
       const role = decodedRefreshToken.role
       const res = role === Role.Guest ? await guestApiRequest.refreshToken() : await authApiRequest.refreshToken()
