@@ -19,6 +19,7 @@ import { formatDateTimeToLocaleString, simpleMatchText } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { GetListGuestsResType } from '@/schemaValidations/account.schema'
 import { endOfDay, format, startOfDay } from 'date-fns'
+import { useGetGuestListQuery } from '@/queries/useAccount'
 
 type GuestItem = GetListGuestsResType['data'][0]
 
@@ -39,7 +40,11 @@ export const columns: ColumnDef<GuestItem>[] = [
   {
     accessorKey: 'tableNumber',
     header: 'Số bàn',
-    cell: ({ row }) => <div className='capitalize'>{row.getValue('tableNumber')}</div>
+    cell: ({ row }) => <div className='capitalize'>{row.getValue('tableNumber')}</div>,
+    filterFn: (row, columnId, filterValue: string) => {
+      if (filterValue === undefined) return true
+      return simpleMatchText(String(row.original.tableNumber), String(filterValue))
+    }
   },
   {
     accessorKey: 'createdAt',
@@ -60,7 +65,8 @@ export default function GuestsDialog({ onChoose }: { onChoose: (guest: GuestItem
   const [open, setOpen] = useState(false)
   const [fromDate, setFromDate] = useState(initFromDate)
   const [toDate, setToDate] = useState(initToDate)
-  const data: GetListGuestsResType['data'] = []
+  const guestListQuery = useGetGuestListQuery({ fromDate, toDate })
+  const data = guestListQuery.data?.payload.data ?? []
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
