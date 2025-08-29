@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const managePaths = ['/manage']
 const guestPaths = ['/guest']
+const onlyOwnerPaths = ['/manage/accounts']
 const privatePaths = [...managePaths, ...guestPaths]
 const unAuthPaths = ['/login']
 
@@ -42,6 +43,11 @@ export function middleware(request: NextRequest) {
     // Not guest but access to guest path
     const isNotGuestGoToGuestPath = role !== Role.Guest && guestPaths.some((path) => pathname.startsWith(path))
     if (isGuestGoToManagePath || isNotGuestGoToGuestPath) {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
+    // Not owner but try to access owner path
+    const isNotOwnerGoToOwnerPath = role !== Role.Owner && onlyOwnerPaths.some((path) => pathname.startsWith(path))
+    if (isGuestGoToManagePath || isNotGuestGoToGuestPath || isNotOwnerGoToOwnerPath) {
       return NextResponse.redirect(new URL('/', request.url))
     }
     return NextResponse.next()
