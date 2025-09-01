@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { handleErrorApi } from '@/lib/utils'
+import { generateSocketInstance, handleErrorApi } from '@/lib/utils'
 import { useLoginMutation } from '@/queries/useAuth'
 import { LoginBody, LoginBodyType } from '@/schemaValidations/auth.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -19,7 +19,7 @@ export default function LoginForm() {
   const loginMutation = useLoginMutation()
   const searchParams = useSearchParams()
   const clearTokens = searchParams.get('clearTokens')
-  const { setRole } = useAppContext()
+  const { setRole, setSocket } = useAppContext()
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
     defaultValues: {
@@ -40,7 +40,7 @@ export default function LoginForm() {
       const result = await loginMutation.mutateAsync(data)
       toast(result.payload.message)
       setRole(result.payload.data.account.role)
-      router.push('/manage/dashboard')
+      ;(router.push('/manage/dashboard'), setSocket(generateSocketInstance(result.payload.data.accessToken)))
     } catch (error) {
       handleErrorApi({
         error,

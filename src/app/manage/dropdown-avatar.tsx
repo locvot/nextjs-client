@@ -16,16 +16,11 @@ import { handleErrorApi } from '@/lib/utils'
 import useAccountMe from '@/queries/useAccount'
 import { useAppContext } from '@/components/app-provider'
 
-// const account = {
-//   name: 'Nguyễn Văn A',
-//   avatar: 'https://i.pravatar.cc/150'
-// }
-
 export default function DropdownAvatar() {
   const logoutMutation = useLogoutMutation()
   const router = useRouter()
   const { data } = useAccountMe()
-  const { setRole } = useAppContext()
+  const { setRole, disconnectSocket } = useAppContext()
   const account = data?.payload.data
 
   const logout = async () => {
@@ -33,6 +28,7 @@ export default function DropdownAvatar() {
     try {
       await logoutMutation.mutateAsync()
       setRole()
+      disconnectSocket()
       router.push('/')
     } catch (error) {
       handleErrorApi({
